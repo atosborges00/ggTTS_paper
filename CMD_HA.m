@@ -1,5 +1,14 @@
-%% Dados do problema
-% Importação do banco de dadados de dertamtologia
+%% Centroid Minimum Distance Classifier for the HA Process
+% Code author: Atos Borges
+% Date: 06/06/2021
+% This code was developed and will publish by the authors at the paper:
+% AUTOMATIC IDENTIFICATION OF SYNTHETICALLY GENARATED INTERLANGUAGE 
+% TRANSFER PHENOMENA BETWEEN BRAZILIAN PORTUGUESE (L1) AND ENGLISH AS 
+% FOREIGN LANGUAGE (L2).
+%
+% You SHOULD NOT use, copy, modify or redistribute any of this code before
+% the final paper be published. We will let you know when this code will be
+% available for public use.
 
 clear; close all; clc;
 addpath(genpath('phonetic_data'))
