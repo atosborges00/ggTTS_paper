@@ -72,7 +72,7 @@ for test_round = 1:max_test_rounds
     
     % Chamada da função que implementa o classificador 3 (Matriz de
     % covariância distinta para cada classe)
-    classes = classificador_quadratico(Mcovs, centroids, X_tst);
+    classes = quadratic_classifier(Mcovs, centroids, X_tst);
     
     % Calculando o percentual de acerto do classificador 3
     acertos(test_round) = mean(classes == Y_tst)*100;
@@ -104,7 +104,7 @@ end
 media = mean(acertos);    % Acerto médio
 dp = std(acertos);        % Desvio padrão
 
-confusion = test_round(confusion/Nr);
+confusion = round(confusion/max_test_rounds);
 
 % Exibição dos resultados
 fprintf('\n\nAcerto máximo classificador: %.2f\n', maximo);
