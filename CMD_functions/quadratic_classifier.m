@@ -8,25 +8,17 @@ function classes = quadratic_classifier(covariance_matrices, centroids, X_test)
 %
 % Output: classes: (number_test_samples, 1)
 
-number_classes = size(centroids, 1);
 number_samples = size(X_test, 1);
-
-% Initiating the output variable
 classes = zeros(number_samples, 1);
 
-% Initiating the inverse covariance matrices variable
 inv_covariance_matrices = invert_covariance_matrices(covariance_matrices);
 
-
-for i = 1:number_samples
-    distances = zeros(1,number_classes);
+for sample = 1:number_samples
     
-    for j = 1:number_classes
-        distances(1,j) = (X_test(i,:)-centroids(j,:)) * inv_covariance_matrices{j} * (X_test(i,:)-centroids(j,:))';
-    end
+    distances = get_distances(inv_covariance_matrices, centroids, X_test(sample,:));
     
-    [~, d_idx] = min(distances);
-    classes(i,1) = d_idx;
+    [~, closer_class] = min(distances);
+    classes(sample, 1) = closer_class;
 end
 
 end
