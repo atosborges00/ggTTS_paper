@@ -1,35 +1,51 @@
-%% Dados do problema
-% Importação do banco de dadados de dertamtologia
+%% Centroid Minimum Distance Classifier for the HA Process
+% Code author: Atos Borges
+% Date: 06/06/2021
+% This code was developed and will publish by the authors at the paper:
+% AUTOMATIC IDENTIFICATION OF SYNTHETICALLY GENARATED INTERLANGUAGE 
+% TRANSFER PHENOMENA BETWEEN BRAZILIAN PORTUGUESE (L1) AND ENGLISH AS 
+% FOREIGN LANGUAGE (L2).
+%
+% You SHOULD NOT use, copy, modify or redistribute any of this code before
+% the final paper be published. We will let you know when this code will be
+% available for public use.
 
+%% Setup
+
+% Cleaning and adding the subfolders to the MATLAB path
 clear; close all; clc;
 addpath(genpath('phonetic_data'))
+addpath(genpath('CMD_functions'))
 
-% Separação das amostras e os alvos
+% Loading data files
 X = load('FULL_AH_data.txt');
 Y = load('AH_targets.txt');
+
+% Switching one-hot-encoded format for numerical categories
 [~,Y] = max(Y,[],2);
 
-%% Classificadores
-% Seção que cria as variáveis necessárias e faz a chamada das funções onde
-% estão implementados todos os classificadores
+% Seting data dimensions
+[number_samples, number_features] = size(X);
 
-% Número de rodadas
-Nr = 100;
+% Number of classes
+number_classes = max(Y);
 
-% Porcentagem de dados usados para treino
+% Trainig dataset setup
 train_Percent = 70;
+number_training_samples = round((train_Percent/100)*number_samples,0);
 
-% Definição do número de amostras de treino
-[m, p] = size(X);   % tamanho dos dados
-n_class = max(Y); % número de classes
-num_train = round((train_Percent/100)*m,0); %número de amostras de treino
+% Confusion matriz setup
+confusion = zeros(number_classes, number_classes);
 
-confusion = zeros(n_class, n_class);   % Matriz de confusão
+% Number of maximum rounds of test
+max_test_rounds = 100;
 
-for rodada = 1:Nr
+%% Centroid Minimum Distance algorithm
+
+for test_round = 1:max_test_rounds
     
-    indTrain = randperm(m, num_train);  % Seleção dos índices de treinamento
-    indTest = true(1,m);      %Cria um vetor de "1" lógicos
+    indTrain = randperm(number_samples, number_training_samples);  % Seleção dos índices de treinamento
+    indTest = true(1,number_samples);      %Cria um vetor de "1" lógicos
     indTest(indTrain) = false;  % Torna falso todos os índices que já foram escolhidos
     
     X_trn = X(indTrain,:);  % Separa todos os dados de treino para matriz X
@@ -40,15 +56,15 @@ for rodada = 1:Nr
     
     % Declarando uma variável do tipo célula para armazenar as matrizes de
     % covariância de cada classe
-    Mcovs = cell(1,6);
+    Mcovs = cell(1,number_classes);
     
     % Cálculo das matrizes de ovariância de cada classe
-    for i = 1:n_class
+    for i = 1:number_classes
         Mcovs{i} = cov(X_trn(Y_trn == i,:));
     end
     
     % Cálculo do centroide de cada classe
-    for i = 1:n_class
+    for i = 1:number_classes
         centroids(i,:) = mean(X_trn(Y_trn == i,:));
     end
         
@@ -56,24 +72,24 @@ for rodada = 1:Nr
     
     % Chamada da função que implementa o classificador 3 (Matriz de
     % covariância distinta para cada classe)
-    classes = classificador_quadratico(Mcovs, centroids, X_tst);
+    classes = quadratic_classifier(Mcovs, centroids, X_tst);
     
     % Calculando o percentual de acerto do classificador 3
-    acertos(rodada) = mean(classes == Y_tst)*100;
+    acertos(test_round) = mean(classes == Y_tst)*100;
     
     % Construção das matrizes de covariância do resultado máximo e mínimo
-    for label1 = 1:n_class
-        for label2 = 1:n_class
+    for label1 = 1:number_classes
+        for label2 = 1:number_classes
             confusion(label1,label2) = confusion(label1,label2) + sum((classes==label1).*(Y_tst==label2));
         end
     end
     
-    for label = 1:n_class
+    for label = 1:number_classes
         precision(label) = confusion(label,label)/sum(confusion(:,label));
         recall(label) = confusion(label,label)/sum(confusion(label,:));
     end
     
-    f1(rodada) = 2*(mean(precision)*mean(recall))/(mean(precision)+mean(recall));
+    f1(test_round) = 2*(mean(precision)*mean(recall))/(mean(precision)+mean(recall));
     
 end
 
@@ -88,7 +104,7 @@ end
 media = mean(acertos);    % Acerto médio
 dp = std(acertos);        % Desvio padrão
 
-confusion = round(confusion/Nr);
+confusion = round(confusion/max_test_rounds);
 
 % Exibição dos resultados
 fprintf('\n\nAcerto máximo classificador: %.2f\n', maximo);
