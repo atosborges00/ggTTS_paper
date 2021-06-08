@@ -56,7 +56,7 @@ for test_round = 1:max_test_rounds
     
     % Declarando uma variável do tipo célula para armazenar as matrizes de
     % covariância de cada classe
-    Mcovs = cell(1,6);
+    Mcovs = cell(1,number_classes);
     
     % Cálculo das matrizes de ovariância de cada classe
     for i = 1:number_classes

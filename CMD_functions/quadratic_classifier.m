@@ -2,24 +2,21 @@ function classes = quadratic_classifier(covariance_matrices, centroids, X_test)
 % Function performing the classification. It is the implementation of
 % a quadratic distance classifier with the centroids as reference.
 %
-% Inputs: covariance_matrices: (1, number_classes)
+% Inputs: covariance_matrices: cell(1, number_classes)
 %         centroids: (number_classes, number_features)
 %         X_test: (number_test_samples, number_features)
 %
 % Output: classes: (number_test_samples, 1)
 
-number_classes = size(centroids,1);
-[number_samples, ~] = size(X_test);
+number_classes = size(centroids, 1);
+number_samples = size(X_test, 1);
 
 % Initiating the output variable
 classes = zeros(number_samples, 1);
 
 % Initiating the inverse covariance matrices variable
-inv_covariance_matrices = cell(1,number_classes);
+inv_covariance_matrices = invert_covariance_matrices(covariance_matrices);
 
-for i = 1:number_classes
-    inv_covariance_matrices{i} = pinv(covariance_matrices{i});
-end
 
 for i = 1:number_samples
     distances = zeros(1,number_classes);
