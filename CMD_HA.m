@@ -54,14 +54,8 @@ for test_round = 1:max_test_rounds
     X_tst = X(indTest,:);   % Separa todos os dados de teste para matriz testX
     Y_tst = Y(indTest,:);   % Separa todos os targets de teste para matriz testY
     
-    % Declarando uma variável do tipo célula para armazenar as matrizes de
-    % covariância de cada classe
-    Mcovs = cell(1,number_classes);
-    
-    % Cálculo das matrizes de ovariância de cada classe
-    for i = 1:number_classes
-        Mcovs{i} = cov(X_trn(Y_trn == i,:));
-    end
+    % Calculating the covariance matrices for each class on the dataset
+    covariance_matrices = get_covariance_matrices(X_trn, Y_trn);
     
     % Cálculo do centroide de cada classe
     for i = 1:number_classes
@@ -72,7 +66,7 @@ for test_round = 1:max_test_rounds
     
     % Chamada da função que implementa o classificador 3 (Matriz de
     % covariância distinta para cada classe)
-    classes = quadratic_classifier(Mcovs, centroids, X_tst);
+    classes = quadratic_classifier(covariance_matrices, centroids, X_tst);
     
     % Calculando o percentual de acerto do classificador 3
     acertos(test_round) = mean(classes == Y_tst)*100;
