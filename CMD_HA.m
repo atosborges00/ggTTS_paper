@@ -25,9 +25,6 @@ Y = load('AH_targets.txt');
 % Switching one-hot-encoded format for numerical categories
 [~,Y] = max(Y,[],2);
 
-% Seting data dimensions
-[number_samples, number_features] = size(X);
-
 % Number of classes
 number_classes = max(Y);
 
@@ -51,8 +48,6 @@ for test_round = 1:max_test_rounds
     for i = 1:number_classes
         centroids(i,:) = mean(X_train(Y_train == i,:));
     end
-        
-    %%%%%%%%%%%%%%%%%%%%%%%%%% CLASSIFICADOR 3 %%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     % Classification by the quadratic classifier
     classes = quadratic_classifier(covariance_matrices, centroids, X_test);
@@ -63,12 +58,8 @@ for test_round = 1:max_test_rounds
     % Calculating confusion matrix
     confusion_matrix = get_confusion_matrix(classes, Y_test);
     
-    for label = 1:number_classes
-        precision(label) = confusion_matrix(label,label)/sum(confusion_matrix(:,label));
-        recall(label) = confusion_matrix(label,label)/sum(confusion_matrix(label,:));
-    end
-    
-    f1(test_round) = 2*(mean(precision)*mean(recall))/(mean(precision)+mean(recall));
+    % Calculating the F1 score of the model
+    f1_score(test_round) = get_f1_score(confusion_matrix);
     
 end
 
@@ -91,5 +82,5 @@ fprintf('Desvio padrão 100 rodadas classificador: %.2f\n\n', dp);
 fprintf('Matriz de confusão máxima do classificador: \n');
 disp(confusion_matrix);
 
-media_f1 = mean(f1)
-dpf1 = std(f1)
+media_f1 = mean(f1_score)
+dpf1 = std(f1_score)
