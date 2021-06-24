@@ -16,6 +16,7 @@
 clear; close all; clc;
 addpath(genpath('phonetic_data'))
 addpath(genpath('CMD_functions'))
+addpath(genpath('utils'))
 
 % Loading data files
 X = load('FULL_AH_data.txt');
@@ -32,7 +33,6 @@ number_classes = max(Y);
 
 % Trainig dataset setup
 train_Percent = 70;
-number_training_samples = round((train_Percent/100)*number_samples,0);
 
 % Confusion matriz setup
 confusion = zeros(number_classes, number_classes);
@@ -44,37 +44,30 @@ max_test_rounds = 100;
 
 for test_round = 1:max_test_rounds
     
-    indTrain = randperm(number_samples, number_training_samples);  % Seleção dos índices de treinamento
-    indTest = true(1,number_samples);      %Cria um vetor de "1" lógicos
-    indTest(indTrain) = false;  % Torna falso todos os índices que já foram escolhidos
-    
-    X_trn = X(indTrain,:);  % Separa todos os dados de treino para matriz X
-    Y_trn = Y(indTrain,:);  % Separa todos os targets de treino para matriz y
-    
-    X_tst = X(indTest,:);   % Separa todos os dados de teste para matriz testX
-    Y_tst = Y(indTest,:);   % Separa todos os targets de teste para matriz testY
+    % Holdout cross-validation
+    [X_train, Y_train, X_test, Y_test] = holdout_cv(X, Y, train_Percent);
     
     % Calculating the covariance matrices for each class on the dataset
-    covariance_matrices = get_covariance_matrices(X_trn, Y_trn);
+    covariance_matrices = get_covariance_matrices(X_train, Y_train);
     
     % Cálculo do centroide de cada classe
     for i = 1:number_classes
-        centroids(i,:) = mean(X_trn(Y_trn == i,:));
+        centroids(i,:) = mean(X_train(Y_train == i,:));
     end
         
     %%%%%%%%%%%%%%%%%%%%%%%%%% CLASSIFICADOR 3 %%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     % Chamada da função que implementa o classificador 3 (Matriz de
     % covariância distinta para cada classe)
-    classes = quadratic_classifier(covariance_matrices, centroids, X_tst);
+    classes = quadratic_classifier(covariance_matrices, centroids, X_test);
     
     % Calculando o percentual de acerto do classificador 3
-    acertos(test_round) = mean(classes == Y_tst)*100;
+    acertos(test_round) = mean(classes == Y_test)*100;
     
     % Construção das matrizes de covariância do resultado máximo e mínimo
     for label1 = 1:number_classes
         for label2 = 1:number_classes
-            confusion(label1,label2) = confusion(label1,label2) + sum((classes==label1).*(Y_tst==label2));
+            confusion(label1,label2) = confusion(label1,label2) + sum((classes==label1).*(Y_test==label2));
         end
     end
     
