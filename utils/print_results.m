@@ -13,14 +13,12 @@ accuracy_std = std(accuracy);
 mean_f1_score = mean(f1_score);
 f1_score_std = std(f1_score);
 
-fprintf('\n\nMaximum accuracy: %.2f\n', maximum_accuracy);
-fprintf('\n\nMinimum accuracy: %.2f\n', minimum_accuracy);
-fprintf('\n\nMean accuracy: %.2f\n', mean_accuracy);
-fprintf('\n\nAccuracy standard deviation: %.2f\n', accuracy_std);
+fprintf('\nMaximum accuracy: %.2f\n', maximum_accuracy);
+fprintf('Minimum accuracy: %.2f\n', minimum_accuracy);
+fprintf('Mean accuracy: %.2f\n', mean_accuracy);
+fprintf('Accuracy standard deviation: %.2f\n', accuracy_std);
 
-fprintf('\n\n\n');
-
-fprintf('\n\nMean F1 score: %.2f\n', mean_f1_score);
-fprintf('\n\nF1 score standard deviation: %.2f\n', f1_score_std);
+fprintf('\n\nMean F1 score: %.5f\n', mean_f1_score);
+fprintf('F1 score standard deviation: %.5f\n\n', f1_score_std);
 
 end

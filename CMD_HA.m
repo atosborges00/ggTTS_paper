@@ -63,24 +63,7 @@ for test_round = 1:max_test_rounds
     
 end
 
-%% Resultados
-% Seção que reúne e imprime as métricas de avaliação de desempenho de cada
-% algoritmo implementado.
+%% Results
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% Classificador 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-
-[maximo, ind_max] = max(accuracy);    % Acerto máximo
-[minimo, ind_min] = min(accuracy);    % Acerto mínimo
-media = mean(accuracy);    % Acerto médio
-dp = std(accuracy);        % Desvio padrão
-
-% Exibição dos resultados
-fprintf('\n\nAcerto máximo classificador: %.2f\n', maximo);
-fprintf('Acerto mínimo classificador: %.2f\n', minimo);
-fprintf('Acerto médio classificador: %.2f\n', media);
-fprintf('Desvio padrão 100 rodadas classificador: %.2f\n\n', dp);
-fprintf('Matriz de confusão máxima do classificador: \n');
-disp(confusion_matrix);
-
-media_f1 = mean(f1_score)
-dpf1 = std(f1_score)
+% Printing all the final results
+print_results(accuracy, f1_score)
