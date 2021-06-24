@@ -34,9 +34,6 @@ number_classes = max(Y);
 % Trainig dataset setup
 train_Percent = 70;
 
-% Confusion matriz setup
-confusion = zeros(number_classes, number_classes);
-
 % Number of maximum rounds of test
 max_test_rounds = 100;
 
@@ -57,23 +54,18 @@ for test_round = 1:max_test_rounds
         
     %%%%%%%%%%%%%%%%%%%%%%%%%% CLASSIFICADOR 3 %%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    % Chamada da função que implementa o classificador 3 (Matriz de
-    % covariância distinta para cada classe)
+    % Classification by the quadratic classifier
     classes = quadratic_classifier(covariance_matrices, centroids, X_test);
     
-    % Calculando o percentual de acerto do classificador 3
-    acertos(test_round) = mean(classes == Y_test)*100;
+    % Calculating the accuracy achived
+    accuracy(test_round) = mean(classes == Y_test)*100;
     
-    % Construção das matrizes de covariância do resultado máximo e mínimo
-    for label1 = 1:number_classes
-        for label2 = 1:number_classes
-            confusion(label1,label2) = confusion(label1,label2) + sum((classes==label1).*(Y_test==label2));
-        end
-    end
+    % Calculating confusion matrix
+    confusion_matrix = get_confusion_matrix(classes, Y_test);
     
     for label = 1:number_classes
-        precision(label) = confusion(label,label)/sum(confusion(:,label));
-        recall(label) = confusion(label,label)/sum(confusion(label,:));
+        precision(label) = confusion_matrix(label,label)/sum(confusion_matrix(:,label));
+        recall(label) = confusion_matrix(label,label)/sum(confusion_matrix(label,:));
     end
     
     f1(test_round) = 2*(mean(precision)*mean(recall))/(mean(precision)+mean(recall));
@@ -86,12 +78,10 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% Classificador 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-[maximo, ind_max] = max(acertos);    % Acerto máximo
-[minimo, ind_min] = min(acertos);    % Acerto mínimo
-media = mean(acertos);    % Acerto médio
-dp = std(acertos);        % Desvio padrão
-
-confusion = round(confusion/max_test_rounds);
+[maximo, ind_max] = max(accuracy);    % Acerto máximo
+[minimo, ind_min] = min(accuracy);    % Acerto mínimo
+media = mean(accuracy);    % Acerto médio
+dp = std(accuracy);        % Desvio padrão
 
 % Exibição dos resultados
 fprintf('\n\nAcerto máximo classificador: %.2f\n', maximo);
@@ -99,7 +89,7 @@ fprintf('Acerto mínimo classificador: %.2f\n', minimo);
 fprintf('Acerto médio classificador: %.2f\n', media);
 fprintf('Desvio padrão 100 rodadas classificador: %.2f\n\n', dp);
 fprintf('Matriz de confusão máxima do classificador: \n');
-disp(confusion);
+disp(confusion_matrix);
 
 media_f1 = mean(f1)
 dpf1 = std(f1)
