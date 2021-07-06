@@ -16,6 +16,7 @@
 clear; close all; clc;
 addpath(genpath('phonetic_data'))
 addpath(genpath('CMD_functions'))
+addpath(genpath('utils'))
 
 % Loading data files
 X = load('FULL_AH_data.txt');
@@ -24,18 +25,14 @@ Y = load('AH_targets.txt');
 % Switching one-hot-encoded format for numerical categories
 [~,Y] = max(Y,[],2);
 
-% Seting data dimensions
-[number_samples, number_features] = size(X);
+% Performing mean normalization on the dataset
+X = mean_normalization(X);
 
 % Number of classes
 number_classes = max(Y);
 
 % Trainig dataset setup
 train_Percent = 70;
-number_training_samples = round((train_Percent/100)*number_samples,0);
-
-% Confusion matriz setup
-confusion = zeros(number_classes, number_classes);
 
 % Number of maximum rounds of test
 max_test_rounds = 100;
@@ -44,69 +41,32 @@ max_test_rounds = 100;
 
 for test_round = 1:max_test_rounds
     
-    indTrain = randperm(number_samples, number_training_samples);  % Seleção dos índices de treinamento
-    indTest = true(1,number_samples);      %Cria um vetor de "1" lógicos
-    indTest(indTrain) = false;  % Torna falso todos os índices que já foram escolhidos
-    
-    X_trn = X(indTrain,:);  % Separa todos os dados de treino para matriz X
-    Y_trn = Y(indTrain,:);  % Separa todos os targets de treino para matriz y
-    
-    X_tst = X(indTest,:);   % Separa todos os dados de teste para matriz testX
-    Y_tst = Y(indTest,:);   % Separa todos os targets de teste para matriz testY
+    % Holdout cross-validation
+    [X_train, Y_train, X_test, Y_test] = holdout_cv(X, Y, train_Percent);
     
     % Calculating the covariance matrices for each class on the dataset
-    covariance_matrices = get_covariance_matrices(X_trn, Y_trn);
+    covariance_matrices = get_covariance_matrices(X_train, Y_train);
     
     % Cálculo do centroide de cada classe
     for i = 1:number_classes
-        centroids(i,:) = mean(X_trn(Y_trn == i,:));
-    end
-        
-    %%%%%%%%%%%%%%%%%%%%%%%%%% CLASSIFICADOR 3 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    % Chamada da função que implementa o classificador 3 (Matriz de
-    % covariância distinta para cada classe)
-    classes = quadratic_classifier(covariance_matrices, centroids, X_tst);
-    
-    % Calculando o percentual de acerto do classificador 3
-    acertos(test_round) = mean(classes == Y_tst)*100;
-    
-    % Construção das matrizes de covariância do resultado máximo e mínimo
-    for label1 = 1:number_classes
-        for label2 = 1:number_classes
-            confusion(label1,label2) = confusion(label1,label2) + sum((classes==label1).*(Y_tst==label2));
-        end
+        centroids(i,:) = mean(X_train(Y_train == i,:));
     end
     
-    for label = 1:number_classes
-        precision(label) = confusion(label,label)/sum(confusion(:,label));
-        recall(label) = confusion(label,label)/sum(confusion(label,:));
-    end
+    % Classification by the quadratic classifier
+    classes = quadratic_classifier(covariance_matrices, centroids, X_test);
     
-    f1(test_round) = 2*(mean(precision)*mean(recall))/(mean(precision)+mean(recall));
+    % Calculating the accuracy achived
+    accuracy(test_round) = mean(classes == Y_test)*100;
+    
+    % Calculating confusion matrix
+    confusion_matrix = get_confusion_matrix(classes, Y_test);
+    
+    % Calculating the F1 score of the model
+    f1_score(test_round) = get_f1_score(confusion_matrix);
     
 end
 
-%% Resultados
-% Seção que reúne e imprime as métricas de avaliação de desempenho de cada
-% algoritmo implementado.
+%% Results
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% Classificador 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-
-[maximo, ind_max] = max(acertos);    % Acerto máximo
-[minimo, ind_min] = min(acertos);    % Acerto mínimo
-media = mean(acertos);    % Acerto médio
-dp = std(acertos);        % Desvio padrão
-
-confusion = round(confusion/max_test_rounds);
-
-% Exibição dos resultados
-fprintf('\n\nAcerto máximo classificador: %.2f\n', maximo);
-fprintf('Acerto mínimo classificador: %.2f\n', minimo);
-fprintf('Acerto médio classificador: %.2f\n', media);
-fprintf('Desvio padrão 100 rodadas classificador: %.2f\n\n', dp);
-fprintf('Matriz de confusão máxima do classificador: \n');
-disp(confusion);
-
-media_f1 = mean(f1)
-dpf1 = std(f1)
+% Printing all the final results
+print_results(accuracy, f1_score)
