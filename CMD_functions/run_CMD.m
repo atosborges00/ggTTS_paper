@@ -15,9 +15,6 @@ function run_CMD(X, Y, train_percent, max_test_rounds)
 % Performing mean normalization on the dataset
 X = mean_normalization(X);
 
-% Number of classes
-number_classes = max(Y);
-
 %% Centroid Minimum Distance main loop
 for test_round = 1:max_test_rounds
 
@@ -27,10 +24,8 @@ for test_round = 1:max_test_rounds
     % Calculating the covariance matrices for each class on the dataset
     covariance_matrices = get_covariance_matrices(X_train, Y_train);
 
-    % Cálculo do centroide de cada classe
-    for i = 1:number_classes
-        centroids(i,:) = mean(X_train(Y_train == i,:));
-    end
+    % Calculating the centroids of each class
+    centroids = get_centroids(X_train, Y_train);
 
     % Classification by the quadratic classifier
     classes = quadratic_classifier(covariance_matrices, centroids, X_test);
