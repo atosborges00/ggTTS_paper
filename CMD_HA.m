@@ -25,6 +25,9 @@ Y = load('AH_targets.txt');
 % Switching one-hot-encoded format for numerical categories
 [~,Y] = max(Y,[],2);
 
+% Performing mean normalization on the dataset
+X = mean_normalization(X);
+
 % Number of classes
 number_classes = max(Y);
 
