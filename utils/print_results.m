@@ -18,7 +18,7 @@ fprintf('Minimum accuracy: %.2f\n', minimum_accuracy);
 fprintf('Mean accuracy: %.2f\n', mean_accuracy);
 fprintf('Accuracy standard deviation: %.2f\n', accuracy_std);
 
-fprintf('\n\nMean F1 score: %.5f\n', mean_f1_score);
+fprintf('\nMean F1 score: %.5f\n', mean_f1_score);
 fprintf('F1 score standard deviation: %.5f\n\n', f1_score_std);
 
 end
