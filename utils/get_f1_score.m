@@ -13,7 +13,16 @@ recall = zeros(1, number_classes);
 
 for label = 1:number_classes
     precision(label) = confusion_matrix(label,label)/sum(confusion_matrix(:,label));
+    
+    if isnan(precision(label))
+        precision(label) = 0;
+    end
+    
     recall(label) = confusion_matrix(label,label)/sum(confusion_matrix(label,:));
+    
+    if isnan(recall(label))
+        recall(label) = 0;
+    end
 end
 
 f1_score = 2*(mean(precision)*mean(recall))/(mean(precision)+mean(recall));
