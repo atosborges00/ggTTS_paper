@@ -1,9 +1,13 @@
-clear; clc;
+% Cleaning and adding the subfolders to the MATLAB path
+clear; close all; clc;
+addpath(genpath('phonetic_data'))
+addpath(genpath('kNN_functions'))
+addpath(genpath('utils'))
 
 %% CARREGANDO E SEPARANDO OS DADOS
 
-dataX = load('FULL_AH_data.txt');
-datay = load('AH_targets.txt');
+dataX = load('HA_data.txt');
+datay = load('HA_targets.txt');
 
 [m,n] = size(datay);
 
@@ -27,17 +31,15 @@ for rodada = 1:max_rodada
     
     ind_nearest = knnsearch(X,testX,'K',7,'Distance','mahalanobis','NSMethod','exhaustive');
     
-    for i=1:length(testX)
-        classes_vizinhos = y(ind_nearest(i,:));
-        predicao(i) = mode(classes_vizinhos);
-    end
+    predictions = kNN_classifier(testX, y, ind_nearest);
+    predictions = predictions';
     
-    acertos(rodada) = mean(testy == predicao')*100;
+    acertos(rodada) = mean(testy == predictions')*100;
     
         % Para a matriz confusão.
     for label1 = 1:n
         for label2 = 1:n
-            Mconfusao(label1,label2) = Mconfusao(label1,label2) + sum((testy==label1).*(predicao'==label2));
+            Mconfusao(label1,label2) = Mconfusao(label1,label2) + sum((testy==label1).*(predictions'==label2));
         end
     end
     
