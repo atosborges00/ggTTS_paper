@@ -61,7 +61,7 @@ dataX = (dataX-mean(dataX,2))./ std(dataX,[],2);
 beta = 0.7*(nthroot(hidden_dim, input_dim));
 
 % Número da iteração
-iter=1;
+epoch=1;
 
 % Variável de checagem do conjunto de validação e mse
 val_check = 1;
@@ -69,8 +69,8 @@ mse = inf;
 val_mse = 0;
 
 % ep = Número máximo de épocas
-ep = 1000;
-iter=1; % Número da iteração
+max_epoch = 1000;
+epoch=1; % Número da iteração
 
 % Número máximo de rodadas de teste
 max_rounds = 20;
@@ -90,21 +90,8 @@ confusion = zeros(output_dim,output_dim);
 
 for rodada = 1:max_rounds
     
-    % Inicialização dos pesos da camada oculta:
-    hidden_weights = (-0.5-0.5) .* rand(hidden_dim, input_dim) + 0.5;
-    norm_hidden_weights = sqrt(sum((hidden_weights.^2), 2));
-    hidden_weights = (beta * hidden_weights)./norm_hidden_weights;
-    
-    % Incialização do bias da camada oculta
-    hidden_bias = (-beta-beta).*rand(hidden_dim, 1) + beta;
-    
-    % Inicialização dos pesos da camada de saída:
-    output_weights = (-0.5-0.5).*rand(output_dim, hidden_dim) + 0.5;
-    norm_output_weights = sqrt(sum((output_weights.^2),2));
-    output_weights = (beta*output_weights)./norm_output_weights;
-    
-    % Incialização do bias da camada oculta
-    output_bias = (-beta-beta).*rand(output_dim, 1) + beta;
+    % Initializing neural network weights
+    [hidden_weights, hidden_bias, output_weights, output_bias] = initialize_weights(input_dim, hidden_dim, output_dim);
 
     % Porcentagem de treino
     porc_treino = 65;
@@ -134,10 +121,10 @@ for rodada = 1:max_rounds
     
     tic
     
-    while iter <= ep && mse >= 1e-6  %&& val_check > -1
+    while epoch <= max_epoch && mse >= 1e-6  %&& val_check > -1
         
         % Taxa de aprendizado adaptativa: decaimento exponencial
-        alfa = (1)*(1-(iter/ep));
+        learning_rate = (1)*(1-(epoch/max_epoch));
         
         %%%%%%%%%%%%%%%%%%%%%% Forward Propagation %%%%%%%%%%%%%%%%%%%%%%%%%%%
         
@@ -178,13 +165,13 @@ for rodada = 1:max_rounds
         
         % Atualizações nos pesos da camada de saída
         dv2 = erro.*(v2.*(1-v2));    % Derivada do erro em relação a v2
-        dW2 = (1/length(X))*alfa* dv2 * v1';   % Derivada do erro em relação aos pesos 2
-        db2 = (1/length(X))*alfa*sum(dv2,2); % Derivada do erro em realçao aos termos independentes 2
+        dW2 = (1/length(X))*learning_rate* dv2 * v1';   % Derivada do erro em relação aos pesos 2
+        db2 = (1/length(X))*learning_rate*sum(dv2,2); % Derivada do erro em realçao aos termos independentes 2
         
         % Atualizações dos pesos da camada oculta
         dv1 = (output_weights'*dv2).*(1/2*(1-v1.^2)); % Derivada do erro em relação a v1
-        dW1 = (1/length(X))*alfa * dv1 * X'; % Derivada do erro em relação aos pesos 1
-        db1 = (1/length(X))*alfa*sum(dv1,2); % Derivada do erro em realçao aos termos independentes 1
+        dW1 = (1/length(X))*learning_rate * dv1 * X'; % Derivada do erro em relação aos pesos 1
+        db1 = (1/length(X))*learning_rate*sum(dv1,2); % Derivada do erro em realçao aos termos independentes 1
 
         %%%%%%%%%%%%%%%%%%%%% Atualização dos pesos %%%%%%%%%%%%%%%%%%%%%%
         
@@ -194,11 +181,11 @@ for rodada = 1:max_rounds
         output_bias = output_bias + db2;  % Atualização dos bias da camada de saída
         
         %Variável de contagem de épocas
-        iter = iter+1;
+        epoch = epoch+1;
         
     end
     
-    iter = 1;
+    epoch = 1;
     tempo(rodada) = toc;
     
     % A acurácia da rede é verificada a cada rodada de testes e armazendada
