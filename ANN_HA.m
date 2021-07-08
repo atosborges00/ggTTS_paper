@@ -123,8 +123,8 @@ for rodada = 1:max_rounds
     
     while epoch <= max_epoch && mse >= 1e-6  %&& val_check > -1
         
-        % Taxa de aprendizado adaptativa: decaimento exponencial
-        learning_rate = (1)*(1-(epoch/max_epoch));
+        % Updating the learning rate for each epoch
+        learning_rate = update_learning_rate(epoch, max_epoch);
         
         %%%%%%%%%%%%%%%%%%%%%% Forward Propagation %%%%%%%%%%%%%%%%%%%%%%%%%%%
         
