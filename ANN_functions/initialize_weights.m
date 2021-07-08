@@ -1,13 +1,15 @@
-function [hidden_weights, hidden_bias, output_weights, output_bias] = initialize_weights(hidden_dim, input_dim)
+function [hidden_weights, hidden_bias, output_weights, output_bias] = initialize_weights(input_dim, hidden_dim, output_dim)
 % Function for initializing the weights of the hidden layer and output
 % layer of the neural network by the Nguyen-Widrow method.
 %
-% Inputs: hidden_dim: integer
+% Inputs: input_dim: integer
+%         hidden_dim: integer
 %         output_dim: integer
 %
 % Output: hidden_weights: (number_hidden_neurons, number_attributes)
 %         hidden_bias: (number_hidden_neurons, 1)
 %         output_weights: (number_output_neurons, number_hidden_neurons)
+%         output_bias: (number_output_neurons, 1)
 
 % Nguyen-Widrow initialization factor:
 beta = 0.7*(nthroot(hidden_dim, input_dim));
