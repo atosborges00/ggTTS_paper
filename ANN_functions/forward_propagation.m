@@ -1,4 +1,4 @@
-function network_output = forward_propagation(X_train, hidden_weights, hidden_bias, output_weights, output_bias)
+function [output, hidden_activation] = forward_propagation(X_train, hidden_weights, hidden_bias, output_weights, output_bias)
 % Function for implementing the neural network forward propagation.
 %
 % Inputs: X_train: (number_attributes, number_trainig_samples)
@@ -15,6 +15,6 @@ hidden_activation = (1-exp(-2*linear_hidden_activation))./(1+exp(-2*linear_hidde
 
 % Output layer
 linear_output_activation = (output_weights * hidden_activation) + output_bias;
-network_output = 1.0 ./ (1.0 + exp(-linear_output_activation));  % sigmoid activation
+output = 1.0 ./ (1.0 + exp(-linear_output_activation));  % sigmoid activation
 
 end

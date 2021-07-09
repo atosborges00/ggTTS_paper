@@ -128,18 +128,10 @@ for rodada = 1:max_rounds
         
         %%%%%%%%%%%%%%%%%%%%%% Forward Propagation %%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-        % Camada oculta
-        u1 = (hidden_weights * X) + hidden_bias;    % somatório de pesos ponderados
-        v1 = (1-exp(-2*u1))./(1+exp(-2*u1)); % função de ativação tanh
-        
-        % Camada de saída
-        u2 = (output_weights * v1) + output_bias;    % somatório de pesos ponderados
-        v2 = 1.0 ./ (1.0 + exp(-u2));   % função de ativação sigm
-        
-        y = v2; % Saída da rede
+        [output, hidden_activation] = forward_propagation(X, hidden_weights, hidden_bias, output_weights, output_bias);
         
         % Avaliação do erro da saída
-        erro = yd-y;
+        erro = yd-output;
         mse = (1/(2*length(X)))*sum(sum(erro.^2));
         
         %%%%%%%%%%%%%%%%%%%%%% Teste de validação %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -164,12 +156,12 @@ for rodada = 1:max_rounds
         %%%%%%%%%%%%%%%%%%%%%%% Back Propagation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
         % Atualizações nos pesos da camada de saída
-        dv2 = erro.*(v2.*(1-v2));    % Derivada do erro em relação a v2
-        dW2 = (1/length(X))*learning_rate* dv2 * v1';   % Derivada do erro em relação aos pesos 2
+        dv2 = erro.*(output.*(1-output));    % Derivada do erro em relação a v2
+        dW2 = (1/length(X))*learning_rate* dv2 * hidden_activation';   % Derivada do erro em relação aos pesos 2
         db2 = (1/length(X))*learning_rate*sum(dv2,2); % Derivada do erro em realçao aos termos independentes 2
         
         % Atualizações dos pesos da camada oculta
-        dv1 = (output_weights'*dv2).*(1/2*(1-v1.^2)); % Derivada do erro em relação a v1
+        dv1 = (output_weights'*dv2).*(1/2*(1-hidden_activation.^2)); % Derivada do erro em relação a v1
         dW1 = (1/length(X))*learning_rate * dv1 * X'; % Derivada do erro em relação aos pesos 1
         db1 = (1/length(X))*learning_rate*sum(dv1,2); % Derivada do erro em realçao aos termos independentes 1
 
