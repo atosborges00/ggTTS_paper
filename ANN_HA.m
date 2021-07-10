@@ -130,9 +130,8 @@ for rodada = 1:max_rounds
         
         [output, hidden_activation] = forward_propagation(X, hidden_weights, hidden_bias, output_weights, output_bias);
         
-        % Avaliação do erro da saída
-        output_error = yd - output;
-        mse = (1/(2*length(X)))*sum(sum(output_error.^2));
+        % Calculating the Mean Squared Error of the output
+        [output_error, mse] = get_mean_squared_error(yd, output);
         
         %%%%%%%%%%%%%%%%%%%%%% Teste de validação %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
