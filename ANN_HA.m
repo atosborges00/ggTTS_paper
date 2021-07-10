@@ -1,15 +1,18 @@
-%% Importação dos dados
-clear; clc; close all;
+% Cleaning and adding the subfolders to the MATLAB path
+clear; close all; clc;
+addpath(genpath('phonetic_data'))
+addpath(genpath('ANN_functions'))
+addpath(genpath('utils'))
 
 % X  = Vetor de entrada 
-dataX = load('FULL_AH_data.txt');
+dataX = load('HA_data.txt');
 dataX = dataX';                  % dataX deve ser: atibutos(linhas) x amostras (colunas)
 
 % Tamanho do conjunto de dados
 [m, p] = size(dataX');           % m = numero de amostras, p = numero de atributos
 
 % y  = Classificação das flores presente nas colunas de 5 a 7
-datay = load('AH_targets.txt');
+datay = load('HA_targets.txt');
 datay = datay';
 [~, labels] = max(datay,[],1);
 
@@ -58,7 +61,7 @@ dataX = (dataX-mean(dataX,2))./ std(dataX,[],2);
 beta = 0.7*(nthroot(hidden_dim, input_dim));
 
 % Número da iteração
-iter=1;
+epoch=1;
 
 % Variável de checagem do conjunto de validação e mse
 val_check = 1;
@@ -66,8 +69,8 @@ mse = inf;
 val_mse = 0;
 
 % ep = Número máximo de épocas
-ep = 1000;
-iter=1; % Número da iteração
+max_epoch = 1000;
+epoch=1; % Número da iteração
 
 % Número máximo de rodadas de teste
 max_rounds = 20;
@@ -87,21 +90,8 @@ confusion = zeros(output_dim,output_dim);
 
 for rodada = 1:max_rounds
     
-    % Inicialização dos pesos da camada oculta:
-    W1 = (-0.5-0.5).*rand(hidden_dim, input_dim) + 0.5;
-    norma_W1 = sqrt(sum((W1.^2),2));
-    W1 = (beta*W1)./norma_W1;
-    
-    % Incialização do bias da camada oculta
-    b1 = (-beta-beta).*rand(hidden_dim, 1) + beta;
-    
-    % Inicialização dos pesos da camada de saída:
-    W2 = (-0.5-0.5).*rand(output_dim, hidden_dim) + 0.5;
-    norma_W2 = sqrt(sum((W2.^2),2));
-    W2 = (beta*W2)./norma_W2;
-    
-    % Incialização do bias da camada oculta
-    b2 = (-beta-beta).*rand(output_dim, 1) + beta;
+    % Initializing neural network weights
+    [hidden_weights, hidden_bias, output_weights, output_bias] = initialize_weights(input_dim, hidden_dim, output_dim);
 
     % Porcentagem de treino
     porc_treino = 65;
@@ -131,35 +121,26 @@ for rodada = 1:max_rounds
     
     tic
     
-    while iter <= ep && mse >= 1e-6  %&& val_check > -1
+    while epoch <= max_epoch && mse >= 1e-6  %&& val_check > -1
         
-        % Taxa de aprendizado adaptativa: decaimento exponencial
-        alfa = (1)*(1-(iter/ep));
+        % Updating the learning rate for each epoch
+        learning_rate = update_learning_rate(epoch, max_epoch);
         
         %%%%%%%%%%%%%%%%%%%%%% Forward Propagation %%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-        % Camada oculta
-        u1 = (W1 * X) + b1;    % somatório de pesos ponderados
-        v1 = (1-exp(-2*u1))./(1+exp(-2*u1)); % função de ativação tanh
+        [output, hidden_activation] = forward_propagation(X, hidden_weights, hidden_bias, output_weights, output_bias);
         
-        % Camada de saída
-        u2 = (W2 * v1) + b2;    % somatório de pesos ponderados
-        v2 = 1.0 ./ (1.0 + exp(-u2));   % função de ativação sigm
-        
-        y = v2; % Saída da rede
-        
-        % Avaliação do erro da saída
-        erro = yd-y;
-        mse = (1/(2*length(X)))*sum(sum(erro.^2));
+        % Calculating the Mean Squared Error of the output
+        [output_error, mse] = get_mean_squared_error(yd, output);
         
         %%%%%%%%%%%%%%%%%%%%%% Teste de validação %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
         % Camada oculta
-        u1_val = (W1 * valX) + b1;    % somatório de pesos ponderados
+        u1_val = (hidden_weights * valX) + hidden_bias;    % somatório de pesos ponderados
         v1_val = (1-exp(-2*u1_val))./(1+exp(-2*u1_val)); % função de ativação tanh
         
         % Camada de saída
-        u2_val = (W2 * v1_val) + b2;    % somatório de pesos ponderados
+        u2_val = (output_weights * v1_val) + output_bias;    % somatório de pesos ponderados
         v2_val = 1.0 ./ (1.0 + exp(-u2_val));   % função de ativação sigm
         
         v_y = v2_val; % Saída da rede
@@ -173,29 +154,18 @@ for rodada = 1:max_rounds
         
         %%%%%%%%%%%%%%%%%%%%%%% Back Propagation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-        % Atualizações nos pesos da camada de saída
-        dv2 = erro.*(v2.*(1-v2));    % Derivada do erro em relação a v2
-        dW2 = (1/length(X))*alfa* dv2 * v1';   % Derivada do erro em relação aos pesos 2
-        db2 = (1/length(X))*alfa*sum(dv2,2); % Derivada do erro em realçao aos termos independentes 2
-        
-        % Atualizações dos pesos da camada oculta
-        dv1 = (W2'*dv2).*(1/2*(1-v1.^2)); % Derivada do erro em relação a v1
-        dW1 = (1/length(X))*alfa * dv1 * X'; % Derivada do erro em relação aos pesos 1
-        db1 = (1/length(X))*alfa*sum(dv1,2); % Derivada do erro em realçao aos termos independentes 1
+        delta = back_propagation(X, hidden_activation, output, output_error, output_weights, learning_rate);
 
         %%%%%%%%%%%%%%%%%%%%% Atualização dos pesos %%%%%%%%%%%%%%%%%%%%%%
         
-        W1 = W1 + dW1;  % Atualização dos pesos da camada oculta
-        b1 = b1 + db1;  % Atualização dos bias da camada oculta
-        W2 = W2 + dW2;  % Atualização dos pesos da camada de saída
-        b2 = b2 + db2;  % Atualização dos bias da camada de saída
+        [hidden_weights, hidden_bias, output_weights, output_bias] = update_weights(hidden_weights, hidden_bias, output_weights, output_bias, delta);
         
         %Variável de contagem de épocas
-        iter = iter+1;
+        epoch = epoch+1;
         
     end
     
-    iter = 1;
+    epoch = 1;
     tempo(rodada) = toc;
     
     % A acurácia da rede é verificada a cada rodada de testes e armazendada
@@ -204,11 +174,11 @@ for rodada = 1:max_rounds
     %%%%%%%%%%%%%%%%%%%%% Verificação de acurácia %%%%%%%%%%%%%%%%%%%%%%
     
     % Camada oculta
-    u1 = (W1 * [testX valX]) + b1;    % somatório de pesos ponderados
+    u1 = (hidden_weights * [testX valX]) + hidden_bias;    % somatório de pesos ponderados
     v1 = (1-exp(-2*u1))./(1+exp(-2*u1)); % função de ativação tanh
     
     % Camada de saída
-    u2 = (W2 * v1) + b2;    % somatório de pesos ponderados
+    u2 = (output_weights * v1) + output_bias;    % somatório de pesos ponderados
     v2 = 1.0 ./ (1.0 + exp(-u2));   % função de ativação sigm
     
     [~, pred] = max(v2,[],1);
