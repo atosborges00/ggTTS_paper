@@ -131,8 +131,8 @@ for rodada = 1:max_rounds
         [output, hidden_activation] = forward_propagation(X, hidden_weights, hidden_bias, output_weights, output_bias);
         
         % Avaliação do erro da saída
-        erro = yd-output;
-        mse = (1/(2*length(X)))*sum(sum(erro.^2));
+        output_error = yd - output;
+        mse = (1/(2*length(X)))*sum(sum(output_error.^2));
         
         %%%%%%%%%%%%%%%%%%%%%% Teste de validação %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
@@ -156,7 +156,7 @@ for rodada = 1:max_rounds
         %%%%%%%%%%%%%%%%%%%%%%% Back Propagation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
         % Atualizações nos pesos da camada de saída
-        dv2 = erro.*(output.*(1-output));    % Derivada do erro em relação a v2
+        dv2 = output_error.*(output.*(1-output));    % Derivada do erro em relação a v2
         dW2 = (1/length(X))*learning_rate* dv2 * hidden_activation';   % Derivada do erro em relação aos pesos 2
         db2 = (1/length(X))*learning_rate*sum(dv2,2); % Derivada do erro em realçao aos termos independentes 2
         
