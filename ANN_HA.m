@@ -154,22 +154,14 @@ for rodada = 1:max_rounds
         
         %%%%%%%%%%%%%%%%%%%%%%% Back Propagation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-        % Atualizações nos pesos da camada de saída
-        dv2 = output_error.*(output.*(1-output));    % Derivada do erro em relação a v2
-        dW2 = (1/length(X))*learning_rate* dv2 * hidden_activation';   % Derivada do erro em relação aos pesos 2
-        db2 = (1/length(X))*learning_rate*sum(dv2,2); % Derivada do erro em realçao aos termos independentes 2
-        
-        % Atualizações dos pesos da camada oculta
-        dv1 = (output_weights'*dv2).*(1/2*(1-hidden_activation.^2)); % Derivada do erro em relação a v1
-        dW1 = (1/length(X))*learning_rate * dv1 * X'; % Derivada do erro em relação aos pesos 1
-        db1 = (1/length(X))*learning_rate*sum(dv1,2); % Derivada do erro em realçao aos termos independentes 1
+        delta = back_propagation(X, hidden_activation, output, output_error, output_weights, learning_rate);
 
         %%%%%%%%%%%%%%%%%%%%% Atualização dos pesos %%%%%%%%%%%%%%%%%%%%%%
         
-        hidden_weights = hidden_weights + dW1;  % Atualização dos pesos da camada oculta
-        hidden_bias = hidden_bias + db1;  % Atualização dos bias da camada oculta
-        output_weights = output_weights + dW2;  % Atualização dos pesos da camada de saída
-        output_bias = output_bias + db2;  % Atualização dos bias da camada de saída
+        hidden_weights = hidden_weights + delta.hidden_weights;  % Atualização dos pesos da camada oculta
+        hidden_bias = hidden_bias + delta.hidden_bias;  % Atualização dos bias da camada oculta
+        output_weights = output_weights + delta.output_weights;  % Atualização dos pesos da camada de saída
+        output_bias = output_bias + delta.output_bias;  % Atualização dos bias da camada de saída
         
         %Variável de contagem de épocas
         epoch = epoch+1;
