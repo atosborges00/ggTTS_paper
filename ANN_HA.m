@@ -158,10 +158,7 @@ for rodada = 1:max_rounds
 
         %%%%%%%%%%%%%%%%%%%%% Atualização dos pesos %%%%%%%%%%%%%%%%%%%%%%
         
-        hidden_weights = hidden_weights + delta.hidden_weights;  % Atualização dos pesos da camada oculta
-        hidden_bias = hidden_bias + delta.hidden_bias;  % Atualização dos bias da camada oculta
-        output_weights = output_weights + delta.output_weights;  % Atualização dos pesos da camada de saída
-        output_bias = output_bias + delta.output_bias;  % Atualização dos bias da camada de saída
+        [hidden_weights, hidden_bias, output_weights, output_bias] = update_weights(hidden_weights, hidden_bias, output_weights, output_bias, delta);
         
         %Variável de contagem de épocas
         epoch = epoch+1;
