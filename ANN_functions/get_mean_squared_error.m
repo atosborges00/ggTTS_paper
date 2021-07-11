@@ -8,6 +8,8 @@ function [output_error, mse] = get_mean_squared_error(Y_train, output)
 % Output: output_error: (number_classes, number_trainig_samples)
 %         mse: float
 
+Y_train = Y_train';
+
 number_trainig_samples = size(Y_train, 2);
 
 output_error = Y_train - output;

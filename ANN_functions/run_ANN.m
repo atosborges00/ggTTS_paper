@@ -14,9 +14,9 @@ function run_ANN(X, Y, train_percent, min_mse, max_epoch, max_rounds)
 %% ANN Setup
 
 % Neural Network dimentions
-input_dim = size(dataX,1);
+input_dim = size(X, 2);
 hidden_dim = 2*input_dim + 1;
-output_dim = size(datay,1);
+output_dim = size(Y, 2);
 
 % Performing mean normalization on the dataset
 X = mean_normalization(X);
@@ -67,10 +67,10 @@ for test_round = 1:max_rounds
     predictions = ann_classifier(X_test, hidden_weights, hidden_bias, output_weights, output_bias);
     
     % Converting one hot encoded to single line
-    [~, Y_test] = max(Y_test, [], 1);
+    [~, Y_test] = max(Y_test', [], 1);
     
     % Calculating the accuracy achived
-    acccuracy(test_round) = mean(Y_test == predictions)*100;
+    accuracy(test_round) = mean(Y_test == predictions)*100;
     
     % Calculating confusion matrix
     confusion_matrix = get_confusion_matrix(predictions, Y_test);

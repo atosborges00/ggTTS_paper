@@ -9,6 +9,8 @@ function [output, hidden_activation] = forward_propagation(X_train, hidden_weigh
 %
 % Output: network_output: (number_trainig_samples, number_trainig_samples)
 
+X_train = X_train';
+
 % Hidden layer
 linear_hidden_activation = (hidden_weights * X_train) + hidden_bias;
 hidden_activation = (1-exp(-2*linear_hidden_activation))./(1+exp(-2*linear_hidden_activation)); % tanh activation
