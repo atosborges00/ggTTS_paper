@@ -13,6 +13,8 @@ function delta = back_propagation(X_train, hidden_activation, output, output_err
 %         delta.output_weights: (number_output_neurons, number_hidden_neurons)
 %         delta.output_bias: (number_output_neurons, 1)
 
+X_train = X_train';
+
 number_trainig_samples = size(output, 2);
 
 % Output layer derivatives
